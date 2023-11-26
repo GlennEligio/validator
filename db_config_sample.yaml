@@ -1,0 +1,19 @@
+configuration:
+  - brand_name: VDE
+    environment: INT
+    environment_type: AUTH
+    database:
+      host: DB_HOST
+      port: 7878
+      name: DB_NAME
+      username: DB_USER_NAME
+      password: DB_USER_PASSWORD
+  - brand_name: VDE
+    environment: INT
+    environment_type: LIVE
+    database:
+      host: DB_HOST
+      port: 7878
+      name: DB_NAME
+      username: DB_USER_NAME
+      password: DB_USER_PASSWORD
