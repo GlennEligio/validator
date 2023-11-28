@@ -1,8 +1,15 @@
 package com.glenneligio.dataloadvalidator.subcommands;
 
 import com.glenneligio.dataloadvalidator.models.DbConfiguration;
+import com.glenneligio.dataloadvalidator.models.dam.Image;
+import com.glenneligio.dataloadvalidator.models.dam.ProductAttachment;
+import com.glenneligio.dataloadvalidator.models.dam.XDamManifest;
 import com.glenneligio.dataloadvalidator.services.DbConfigurationService;
 import com.glenneligio.dataloadvalidator.services.DbConfigurationServiceImpl;
+import com.glenneligio.dataloadvalidator.services.dam.ProductAtchService;
+import com.glenneligio.dataloadvalidator.services.dam.ProductAtchServiceImpl;
+import com.glenneligio.dataloadvalidator.services.dam.XDamManifestService;
+import com.glenneligio.dataloadvalidator.services.dam.XDamManifestServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,6 +19,7 @@ import picocli.CommandLine.*;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 @Slf4j
@@ -46,17 +54,30 @@ public class DamValidator implements Runnable{
         log.info("General output - dbConfig: {}:", dbConfigFile);
         log.info("Db inputs: - brand: {}, env: {}, envType: {}", brand, env, envType);
 
-        List<DbConfiguration> dbConfigurations;
-        try {
-            log.info("Getting the dbConfigurations");
-            dbConfigurations = dbConfigurationService.parseYamlFile(dbConfigFile);
-        } catch (FileNotFoundException e) {
-            log.info("Yaml file can't be parsed");
-            throw new RuntimeException(e);
-        }
-        DbConfiguration dbConfiguration = dbConfigurationService.getDbConfig(dbConfigurations, brand, env, envType);
-        log.info("Db Configuration: {}", dbConfiguration);
+//        List<DbConfiguration> dbConfigurations;
+//        try {
+//            log.info("Getting the dbConfigurations");
+//            dbConfigurations = dbConfigurationService.parseYamlFile(dbConfigFile);
+//        } catch (FileNotFoundException e) {
+//            log.info("Yaml file can't be parsed");
+//            throw new RuntimeException(e);
+//        }
+//        DbConfiguration dbConfiguration = dbConfigurationService.getDbConfig(dbConfigurations, brand, env, envType);
+//        log.info("Db Configuration: {}", dbConfiguration);
 
+        XDamManifestService xDamManifestService = new XDamManifestServiceImpl();
+        ProductAtchService productAtchService = new ProductAtchServiceImpl();
+        List<XDamManifest> xDamManifests = xDamManifestService.getAllXDamManifest();
+        log.info("XDamManifestList: {}", xDamManifests);
 
+        Map<String,List<ProductAttachment>> map = productAtchService.getProductAttachmentMap();
+        log.info("Product attachment map: {}", map);
+
+        List<XDamManifest> xDamManifestsWithImages = xDamManifestService.recreateAllImages(xDamManifests);
+        List<ProductAttachment> unalignedAtch = productAtchService.getUnalignedProductAttachments(xDamManifestsWithImages);
+        log.info("Misaligned prodAtch: {}", unalignedAtch);
+
+        List<Image> missingImages = xDamManifestService.getMissingImages(map);
+        log.info("Missing images: {}", missingImages);
     }
 }

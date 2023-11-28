@@ -9,8 +9,11 @@ import java.util.List;
 
 @Service
 public class XDamManifestDaoImpl implements XDamManifestDao{
+
     private String hostname, username, password, dbName;
     private int port;
+
+    public XDamManifestDaoImpl(){}
 
     public XDamManifestDaoImpl(String hostname, String username, String password, String dbName, int port) {
         this.hostname = hostname;
